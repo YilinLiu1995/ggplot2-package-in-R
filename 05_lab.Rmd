@@ -1,0 +1,164 @@
+---
+title: "Statistical Modeling and Graphing"
+author: "Enter Your Name"
+date: "`r Sys.Date()`"
+output: word_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+*Citation*: Trends in Internet-based business-to-business marketing
+
+*Abstract*: The Internet is changing the transactional paradigms under which businesses-to-business marketers operate. Business-to-business marketers that take advantage of the operational efficiencies and effectiveness that emerge from utilizing the Internet in transactions are out performing firms that utilize traditional transactional processes. As an example, Dell computers, by utilizing business-to-business processes that take advantage of the Internet, has gained the largest market share in the PC business when compared to traditional manufacturers such as Compaq. This paper first examines the genesis of the Internet movement in business-to-business markets. The long-term impact of the increase of business-to-business utilization of the Internet on the marketing theory and marketing process is then discussed. Finally, managerial implications and directions for future research are highlighted.
+
+Dataset includes:
+
+    1)  Business marketing focus - traditional or forward thinking.
+    
+    2)	Internet use - low, medium, or high levels of business marketing use on the internet.
+    
+    3)	Time _ 1 - sales scores at the first measurement time.
+    
+    4)	Time _ 2 - sales scores at the second measurement time
+
+On all of these questions, be sure to include a coherent label for the X and Y axes.  You should change them to be "professional looking" (i.e. Proper Case, explain the variable listed, and could be printed in a journal).  The following will be assessed:
+
+    1)	Is it readable?
+    
+    2)	Is X-axis labeled appropriately?
+    
+    3)	Is Y-axis labeled appropriately?
+    
+    4)	Is it the right graph?
+    
+    5) 	Do the labels in the legend look appropriate?
+    
+    6)	Are there error bars when appropriate?
+
+We won't grade for color of bars or background color, but you should consider that these things are usually printed in black/white - so be sure you know how to change those values as well as get rid of that grey background.
+
+Please note that each subpoint (i.e. a, b) indicates a different chart.
+
+```{r}
+library(ggplot2)
+```
+
+
+```{r starting}
+lab5=read.csv("05_data.csv")
+head(lab5)
+str(lab5)
+```
+
+1)	Make a simple histogram using ggplot:
+
+    a.	Sales at time 1
+#begins a plot that I finish by adding one layers to.
+```{r hist1}
+hist1 = ggplot(lab5, aes(time.1)) + 
+    geom_histogram(binwidth=0.25,fill='light green',color='orange')+
+    labs(title = "Business Marketing Focus and Internet Use",subtitle = "Figure for Sales at Time 1",x="Sales at time 1",y="Frequency")+ 
+    theme_classic()
+hist1
+```
+
+    b.	Sales at time 2
+#begins a plot that I finish by adding one layers to.
+
+```{r hist2}
+hist2 = ggplot(lab5, aes(time.2)) + 
+    geom_histogram(binwidth=0.25,color='blue',fill='light blue')+
+    labs(title = "Business Marketing Focus and Internet Use",subtitle = "Figure for Sales at Time 2",x="Sales at time 2",y="Frequency")+ 
+    theme_light()
+hist2
+```
+
+2)	Make a bar chart with two independent variables:
+
+    a.	Business focus, internet, DV: sales at time 2 
+
+```{r bar1}
+# (both IV are discrete) BF and Internet
+bar1=ggplot(lab5, aes(biz_focus,time.2,fill=internet))+
+    stat_summary(fun=mean,
+                 geom = 'bar',
+                 position = 'dodge')+
+    stat_summary(fun.data = "mean_cl_normal",geom = "errorbar",position = position_dodge(width = 0.5),width= 0.3) +
+    labs(title = "Business Marketing Focus and Internet Use",subtitle = "Figure for bar chart with two IVs: BF and Internet",x="Business Focus",y="Sales at time 2")+
+    scale_fill_manual(name = "Internet Use", labels = c("High", "Medium","Low"), values = c("Blue", "Pink", "Cyan"))+
+    theme_classic()
+
+bar1
+```
+
+3)	Make a bar chart with two independent variables: 
+
+    a.	Time (time 1, time 2), Business focus, DV: is sales from time 1 and 2 
+
+```{r melt}
+#(one continuous, one discrete) Time and BF
+
+library(reshape)
+lab5dat = melt(lab5, id.vars = c('id','biz_focus','internet'), measure.vars = c('time.1','time.2'))
+head(lab5dat)
+```
+
+```{r bar2}
+bar2=ggplot(lab5dat,aes(biz_focus,value,fill=variable))+
+    stat_summary(fun = mean,geom="bar",position = "dodge")+
+    stat_summary(fun.data = "mean_cl_normal",geom = "errorbar",position = position_dodge(width = 0.5),width= 0.3) +
+    labs(title = "Business Marketing Focus and Internet Use",subtitle = "Figure for bar chart with two IVs: BF and Time",x="Business Focus",y="Sales at time 1 and 2")+
+    scale_fill_manual(name = "Time", labels = c("Time.1", "Time.2"), values = c("Blue", "Pink"))+
+    theme_classic()
+    
+bar2
+```
+
+
+
+4)	Make a simple line graph:
+
+    a.	Time (time 1, time 2), DV: is sales from time 1 and 2 
+
+```{r line}
+line = ggplot(lab5dat,aes(variable, value))+
+    stat_summary(fun=mean, geom="point")+
+    stat_summary(fun=mean, geom="line", group = 1)+
+    stat_summary(fun.data = "mean_cl_normal",geom = "errorbar",position = position_dodge(width = 0.5),width= 0.3) +
+    labs(title="Business Marketing Focus and Internet Use",subtitle = "Figure for Time1 and Time2",x="Time", y="Sales scores at Time 1 and Time 2")+
+    theme_bw()
+    
+line
+```
+
+5)	Make a simple scatterplot:
+    
+    a.	Sales at Time 1, Time 2
+
+```{r scatter1}
+scatter1 = ggplot(lab5,aes(time.1,time.2))+
+    geom_point(color="red",size=1.5)+
+    labs(title="Business Marketing Focus and Internet Use",subtitle = "Figure for Time1 and Time2",x="Sales scores at Time 1", y="Sales scores at Time 2")+
+    theme_bw()
+
+scatter1
+```
+
+6)	Make a grouped scatterplot:
+
+    a.	Sales at time 1 and 2, Business focus
+
+```{r scatter2}
+scatter2 = ggplot(lab5,aes(time.1,time.2,colour=factor(biz_focus)))+
+    geom_point()+
+    geom_smooth(method='lm', color='orange')+
+    labs(title="Business Marketing Focus and Internet Use",subtitle = "Figure for Time1 and Time2",x="Sales scores at Time 1", y="Sales scores at Time 2")+
+    scale_color_manual(name="Business Focus",
+                      values = c('red','blue'))+
+    theme_bw()
+
+scatter2
+```
+
